@@ -1,6 +1,10 @@
-  const padding = 4 - (colorValues % 4)
-  const unencodedRowLength = colorValues
-  const encodedRowLength = colorValues + padding
+var fs = require('fs')
+
+function encode(unencoded, width, height) {
+  const colorValuesPerRow = unencoded.length / height
+  const padding = 4 - (colorValuesPerRow % 4)
+  const unencodedRowLength = colorValuesPerRow
+  const encodedRowLength = colorValuesPerRow + padding
   const encoded = Buffer.alloc(encodedRowLength * height)
   for (let i = 0; i < height; i++) {
     unencoded.copy(
