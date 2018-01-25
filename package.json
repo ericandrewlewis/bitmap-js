@@ -1,0 +1,29 @@
+{
+	"name": "bmp",
+	"version": "0.0.0",
+	"description": "",
+	"license": "MIT",
+	"repository": "ericandrewlewis/bmp",
+	"author": {
+		"name": "Eric Andrew Lewis",
+		"email": "eric.andrew.lewis@gmail.com",
+		"url": "https://ericandrewlewis.com"
+	},
+	"engines": {
+		"node": ">=9"
+	},
+	"scripts": {
+		"test": "ava"
+	},
+	"files": [
+		"index.js"
+	],
+	"keywords": [
+		""
+	],
+	"dependencies": {},
+	"devDependencies": {
+		"ava": "^0.20.0",
+		"xo": "^0.18.2"
+	}
+}
