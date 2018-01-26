@@ -15,6 +15,36 @@ test('pads data to bmp format', t => {
   t.is(0, encoded.compare(expected))
 })
 
+test('creates a bitmap file header', t => {
+  const fileHeader = m.bitmapFileHeader({})
+  const expectedFileHeader = Buffer.from([
+    'B'.charCodeAt(),
+    'M'.charCodeAt(),
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0
+  ]);
+
+  t.is(
+    0,
+    expectedFileHeader.compare(fileHeader)
+  )
+})
+
+test('writes a DIB header', t => {
+  const dibHeader = m.dibHeader({
+    width: 300,
+    height: 400,
+    bitsPerPixel: 1,
+    bitmapDataSize: 64
+  })
+  // Check a random field in the header.
+  t.is(
+    300,
+    dibHeader.readInt16LE(4)
+  )
+})
+
 test('creates a bitmap file', async t => {
   const width = 1
   const height = 1
