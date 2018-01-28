@@ -1,5 +1,7 @@
 # Bitmap.js
 
+[![Build Status](https://travis-ci.org/ericandrewlewis/bitmap-js.svg?branch=master)](https://travis-ci.org/ericandrewlewis/bitmap-js)
+
 Read and create bitmaps in Node.js
 
 ## Read a bitmap file
