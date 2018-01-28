@@ -6,6 +6,7 @@ import util from "util";
 const readFile = util.promisify(fs.readFile);
 
 test("converts raw bgr pixel data to padded bitmap format for 24 bits per pixel", t => {
+  debugger
   // prettier-ignore
   const unpaddedImageData = Buffer.from([
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -147,9 +148,10 @@ test("creates a 1x1 bitmap file", async t => {
     width,
     height
   });
+  const filename = "filename.bmp";
 
   await m.createBitmapFile({
-    filename: "filename.bmp",
+    filename,
     imageData,
     width,
     height,
@@ -157,7 +159,7 @@ test("creates a 1x1 bitmap file", async t => {
   });
   const bitmapFile = await m.readBitmapFile("filename.bmp");
   t.is(0, bitmapFile.imageData.compare(imageData));
-  // fs.unlinkSync('filename.bmp')
+  fs.unlinkSync(filename)
 });
 
 test("creates a 2x2 bitmap file", async t => {
