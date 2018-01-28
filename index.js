@@ -37,7 +37,13 @@ function bitmapFileHeader({
 
 // Creates a DIB header, specifically a BITMAPINFOHEADER type
 // since it's the most widely supported.
-function dibHeader({ width, height, bitsPerPixel, bitmapDataSize, numberOfColorsInPalette }) {
+function dibHeader({
+  width,
+  height,
+  bitsPerPixel,
+  bitmapDataSize,
+  numberOfColorsInPalette
+}) {
   const buffer = Buffer.alloc(40);
   // The size of the header.
   buffer.writeInt32LE(40, 0);

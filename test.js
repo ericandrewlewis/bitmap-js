@@ -74,6 +74,7 @@ test("reads a bitmap file header", async t => {
   const filedata = await readFile(filename);
   const header = m.readBitmapFileHeader(filedata);
   t.is(54, header.imageDataOffset);
+  fs.unlinkSync(filename);
 });
 
 test("writes a DIB header", t => {
@@ -107,6 +108,7 @@ test("reads a bitmap file dib header", async t => {
   const dibHeader = m.readDibHeader(filedata);
   t.is(1, dibHeader.height);
   t.is(0, dibHeader.numberOfColorsInPalette);
+  fs.unlinkSync(filename);
 });
 
 test("reads a color table", async t => {
@@ -133,9 +135,8 @@ test("reads a color table", async t => {
   });
 
   const filedata = await readFile(filename);
-  t.is(0, colorTable.compare(
-    m.readColorTable(filedata)
-  ));
+  t.is(0, colorTable.compare(m.readColorTable(filedata)));
+  fs.unlinkSync(filename);
 });
 
 test("creates a 1x1 bitmap file", async t => {
@@ -162,6 +163,7 @@ test("creates a 1x1 bitmap file", async t => {
 test("creates a 2x2 bitmap file", async t => {
   const width = 2;
   const height = 2;
+  const filename = "filename-2.bmp";
   const imageData = m.padImageData({
     // prettier-ignore
     unpaddedImageData: Buffer.from([
@@ -173,15 +175,15 @@ test("creates a 2x2 bitmap file", async t => {
   });
 
   await m.createBitmapFile({
-    filename: "filename-2.bmp",
+    filename,
     imageData,
     width,
     height,
     bitsPerPixel: 24
   });
-  const bitmapFile = await m.readBitmapFile("filename-2.bmp");
+  const bitmapFile = await m.readBitmapFile(filename);
   t.is(0, bitmapFile.imageData.compare(imageData));
-  // fs.unlinkSync('filename-2.bmp')
+  fs.unlinkSync(filename);
 });
 
 test("creates a 2x2 bitmap file with 1 bit per pixel", async t => {
@@ -207,5 +209,5 @@ test("creates a 2x2 bitmap file with 1 bit per pixel", async t => {
   });
   const bitmapFile = await m.readBitmapFile(filename);
   t.is(0, bitmapFile.imageData.compare(imageData));
-  // fs.unlinkSync('filename-2.bmp')
+  fs.unlinkSync(filename);
 });
