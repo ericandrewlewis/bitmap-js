@@ -1,20 +1,24 @@
 var fs = require('fs')
 
-function encode(unencoded, width, height) {
-  const colorValuesPerRow = unencoded.length / height
+function padImageData({
+  unpaddedImageData,
+  width,
+  height
+}) {
+  const colorValuesPerRow = unpaddedImageData.length / height
   const padding = 4 - (colorValuesPerRow % 4)
-  const unencodedRowLength = colorValuesPerRow
-  const encodedRowLength = colorValuesPerRow + padding
-  const encoded = Buffer.alloc(encodedRowLength * height)
+  const unpaddedRowLength = colorValuesPerRow
+  const paddedRowLength = colorValuesPerRow + padding
+  const padded = Buffer.alloc(paddedRowLength * height)
   for (let i = 0; i < height; i++) {
-    unencoded.copy(
-      encoded,
-      encodedRowLength * i,
-      unencodedRowLength * i,
-      unencodedRowLength * i + unencodedRowLength
+    unpaddedImageData.copy(
+      padded,
+      paddedRowLength * i,
+      unpaddedRowLength * i,
+      unpaddedRowLength * i + unpaddedRowLength
     )
   }
-  return encoded
+  return padded
 }
 
 function bitmapFileHeader({filesize = 0, applicationHeader = 0, imageDataOffset = 0}) {
@@ -31,7 +35,8 @@ function bitmapFileHeader({filesize = 0, applicationHeader = 0, imageDataOffset 
   return buffer;
 }
 
-// Creates a DIB header, specifically a BITMAPINFOHEADER type.
+// Creates a DIB header, specifically a BITMAPINFOHEADER type
+// since it's the most widely supported.
 function dibHeader({
   width,
   height,
@@ -62,48 +67,110 @@ function dibHeader({
   return buffer;
 }
 
-function createBitmapFile(file, bitmap, width, height) {
+function createBitmapFile({
+  filename,
+  imageData,
+  width,
+  height,
+  bitsPerPixel,
+  colorTable = Buffer.alloc(0)
+}) {
   return new Promise((resolve, reject) => {
-    const filesize = 54 + bitmap.length
+    const imageDataOffset = 54 + colorTable.length
+    const filesize = imageDataOffset + imageData.length
     let fileContent = Buffer.alloc(filesize);
     let fileHeader = bitmapFileHeader({
       filesize,
-      imageDataOffset: 54
+      imageDataOffset
     })
     fileHeader.copy(fileContent)
     dibHeader({
       width,
       height,
-      bitsPerPixel: 24,
-      bitmapDataSize: bitmap.length
+      bitsPerPixel,
+      bitmapDataSize: imageData.length
     }).copy(fileContent, 14)
 
-    bitmap.copy(fileContent, 54)
+    colorTable.copy(fileContent, 54)
 
-    fs.writeFile(file, fileContent, (err) => {
+    imageData.copy(fileContent, imageDataOffset)
+
+    fs.writeFile(filename, fileContent, (err) => {
       if (err) return reject(err)
       resolve()
     })
   })
 }
 
+function readBitmapFileHeader(filedata) {
+  return {
+    filesize: filedata.readInt32LE(2),
+    imageDataOffset: filedata.readInt32LE(10)
+  }
+}
+
+const dibHeaderLengthToVersionMap = {
+  12: 'BITMAPCOREHEADER',
+  16: 'OS22XBITMAPHEADER',
+  40: 'BITMAPINFOHEADER',
+  52: 'BITMAPV2INFOHEADER',
+  56: 'BITMAPV3INFOHEADER',
+  64: 'OS22XBITMAPHEADER',
+  108: 'BITMAPV4HEADER',
+  124: 'BITMAPV5HEADER'
+}
+
+function readDibHeader(filedata) {
+  const dibHeaderLength = filedata.readInt32LE(14)
+  const header = {}
+  header.headerLength = dibHeaderLength
+  header.headerType = dibHeaderLengthToVersionMap[dibHeaderLength]
+  header.width = filedata.readInt32LE(18)
+  header.height = filedata.readInt32LE(22)
+  if (header.headerType == 'BITMAPCOREHEADER') {
+    return header;
+  }
+  header.bitsPerPixel = filedata.readInt16LE(28)
+  header.compressionType = filedata.readInt32LE(30)
+  if (header.headerType == 'OS22XBITMAPHEADER') {
+    return header;
+  }
+  header.bitmapDataSize = filedata.readInt32LE(34)
+  header.numberOfColorsInPalette = filedata.readInt32LE(46)
+  header.numberOfImportantColors = filedata.readInt32LE(50)
+  if (header.headerType == 'BITMAPINFOHEADER') {
+    return header;
+  }
+  // There are more data fields in later versions of the dib header.
+  // I hear that BITMAPINFOHEADER is the most widely supported
+  // header type, so I'm not going to implement them yet.
+  return header;
+}
+
 function readBitmapFile(file) {
   return new Promise((resolve, reject) => {
     fs.readFile(file, (err, filedata) => {
       if (err) return reject(err)
-      const pixelDataLength = filedata.length - 54
-      const pixelData = Buffer.alloc(pixelDataLength)
-      filedata.copy(pixelData, 0, 54)
+      const fileHeader = readBitmapFileHeader(filedata)
+      const dibHeader = readDibHeader(filedata)
+      const imageDataLength = dibHeader.bitmapDataSize
+      const imageDataOffset = fileHeader.imageDataOffset
+      const imageData = Buffer.alloc(imageDataLength)
+      filedata.copy(imageData, 0, imageDataOffset)
       resolve({
-        data: pixelData
+        fileHeader,
+        dibHeader,
+        imageData
       })
     })
   })
 }
 
 module.exports = {
-  encode,
+  padImageData,
   bitmapFileHeader,
+  readBitmapFileHeader,
+  readDibHeader,
   dibHeader,
   createBitmapFile,
   readBitmapFile
