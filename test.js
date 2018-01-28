@@ -109,6 +109,35 @@ test("reads a bitmap file dib header", async t => {
   t.is(0, dibHeader.numberOfColorsInPalette);
 });
 
+test("reads a color table", async t => {
+  const width = 2;
+  const height = 2;
+  const imageData = m.padImageData({
+    unpaddedImageData: Buffer.from([0b10000000, 0b01000000]),
+    width,
+    height
+  });
+  const filename = "filename-6.bmp";
+  // prettier-ignore
+  const colorTable = Buffer.from([
+    0xFF, 0x00, 0xFF, 0x00,
+    0x00, 0xFF, 0xFF, 0x00
+  ]);
+  await m.createBitmapFile({
+    filename,
+    imageData,
+    width,
+    height,
+    bitsPerPixel: 1,
+    colorTable
+  });
+
+  const filedata = await readFile(filename);
+  t.is(0, colorTable.compare(
+    m.readColorTable(filedata)
+  ));
+});
+
 test("creates a 1x1 bitmap file", async t => {
   const width = 1;
   const height = 1;

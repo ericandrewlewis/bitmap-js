@@ -37,7 +37,7 @@ function bitmapFileHeader({
 
 // Creates a DIB header, specifically a BITMAPINFOHEADER type
 // since it's the most widely supported.
-function dibHeader({ width, height, bitsPerPixel, bitmapDataSize }) {
+function dibHeader({ width, height, bitsPerPixel, bitmapDataSize, numberOfColorsInPalette }) {
   const buffer = Buffer.alloc(40);
   // The size of the header.
   buffer.writeInt32LE(40, 0);
@@ -56,7 +56,7 @@ function dibHeader({ width, height, bitsPerPixel, bitmapDataSize }) {
   buffer.writeInt32LE(2835, 24);
   buffer.writeInt32LE(2835, 28);
   // Number of colors in the palette.
-  buffer.writeInt32LE(0, 32);
+  buffer.writeInt32LE(numberOfColorsInPalette, 32);
   // Number of important colors used.
   buffer.writeInt32LE(0, 36);
   return buffer;
@@ -83,7 +83,8 @@ function createBitmapFile({
       width,
       height,
       bitsPerPixel,
-      bitmapDataSize: imageData.length
+      bitmapDataSize: imageData.length,
+      numberOfColorsInPalette: colorTable.length / 4
     }).copy(fileContent, 14);
 
     colorTable.copy(fileContent, 54);
@@ -142,6 +143,14 @@ function readDibHeader(filedata) {
   return header;
 }
 
+function readColorTable(filedata) {
+  const dibHeader = readDibHeader(filedata);
+  const colorTable = Buffer.alloc(dibHeader.numberOfColorsInPalette * 4);
+  const sourceStart = 14 + dibHeader.headerLength;
+  filedata.copy(colorTable, 0, 54, 54 + colorTable.length);
+  return colorTable;
+}
+
 function readBitmapFile(file) {
   return new Promise((resolve, reject) => {
     fs.readFile(file, (err, filedata) => {
@@ -151,11 +160,13 @@ function readBitmapFile(file) {
       const imageDataLength = dibHeader.bitmapDataSize;
       const imageDataOffset = fileHeader.imageDataOffset;
       const imageData = Buffer.alloc(imageDataLength);
+      const colorTable = readColorTable(filedata);
       filedata.copy(imageData, 0, imageDataOffset);
       resolve({
         fileHeader,
         dibHeader,
-        imageData
+        imageData,
+        colorTable
       });
     });
   });
@@ -168,5 +179,6 @@ module.exports = {
   readDibHeader,
   dibHeader,
   createBitmapFile,
-  readBitmapFile
+  readBitmapFile,
+  readColorTable
 };

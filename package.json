@@ -1,30 +1,30 @@
 {
-	"name": "bmp",
-	"version": "0.0.0",
-	"description": "",
-	"license": "MIT",
-	"repository": "ericandrewlewis/bmp",
-	"author": {
-		"name": "Eric Andrew Lewis",
-		"email": "eric.andrew.lewis@gmail.com",
-		"url": "https://ericandrewlewis.com"
-	},
-	"engines": {
-		"node": ">=9"
-	},
-	"scripts": {
-		"test": "ava"
-	},
-	"files": [
-		"index.js"
-	],
-	"keywords": [
-		""
-	],
-	"dependencies": {},
-	"devDependencies": {
-		"ava": "^0.20.0",
-		"prettier": "^1.10.2",
-		"xo": "^0.18.2"
-	}
+  "name": "bitmap-js",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "repository": "ericandrewlewis/bitmap-js",
+  "author": {
+    "name": "Eric Andrew Lewis",
+    "email": "eric.andrew.lewis@gmail.com",
+    "url": "https://ericandrewlewis.com"
+  },
+  "engines": {
+    "node": ">=9"
+  },
+  "scripts": {
+    "test": "ava"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "bitmap"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "ava": "^0.20.0",
+    "prettier": "^1.10.2",
+    "xo": "^0.18.2"
+  }
 }
