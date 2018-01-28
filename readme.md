@@ -1,6 +1,6 @@
 # Bitmap.js
 
-A Node.js implementation of the bitmap filetype.
+Read and create bitmaps in Node.js
 
 ## Read a bitmap file
 
@@ -23,9 +23,9 @@ const bitmapFile = await m.readBitmapFile("filename.bmp");
 //   colorTable: <Buffer ff 00 ff 00 00 ff ff 00> }
 ```
 
-Read a bitmap file to access file and DIB header data, the image pixel data, and the color table.
+Read a bitmap file to access header data, image pixel data, and the color table.
 
-The image data is a binary representation stored in a buffer. The format of the data depends on the bits per pixel of the bitmap, while also taking into account any compression applied to it.
+The image data is a binary representation stored in a buffer. The format of the data depends on the bits per pixel of the bitmap and any compression algorithm applied to it.
 
 The color table is a binary representation of the colors used in the bitmap. Each color occupies four bytes in the format `BLUE GREEN RED 0x00`
 
@@ -72,7 +72,7 @@ await createBitmapFile({
 
 The above code generates a 6x8 bitmap like this:
 
-![smiley](screenshot.png?raw=true)
+![smiley](screenshots/smiley.png?raw=true)
 
 ## Create a 24 bit-per-pixel bitmap file
 
@@ -101,3 +101,7 @@ await createBitmapFile({
   bitsPerPixel: 24
 });
 ```
+
+The above code generates a 2x2 bitmap like this:
+
+![smiley](screenshots/checkers.png?raw=true)
