@@ -70,6 +70,10 @@ await createBitmapFile({
 });
 ```
 
+The above code generates a 6x8 bitmap like this:
+
+![smiley](screenshot.png?raw=true)
+
 ## Create a 24 bit-per-pixel bitmap file
 
 In a 24 bit-per-pixel bitmap file, each pixel occupies three bytes of space: one for the green, blue, and red value of the pixel.
