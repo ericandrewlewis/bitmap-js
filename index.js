@@ -68,15 +68,13 @@ function dibHeader({
   return buffer;
 }
 
-function createBitmapFile({
-  filename,
+function createBitmapBuffer({
   imageData,
   width,
   height,
   bitsPerPixel,
   colorTable = Buffer.alloc(0)
 }) {
-  return new Promise((resolve, reject) => {
     const imageDataOffset = 54 + colorTable.length;
     const filesize = imageDataOffset + imageData.length;
     let fileContent = Buffer.alloc(filesize);
@@ -96,6 +94,27 @@ function createBitmapFile({
     colorTable.copy(fileContent, 54);
 
     imageData.copy(fileContent, imageDataOffset);
+
+    return fileContent;
+}
+
+function createBitmapFile({
+  filename,
+  imageData,
+  width,
+  height,
+  bitsPerPixel,
+  colorTable = Buffer.alloc(0)
+}) {
+  return new Promise((resolve, reject) => {
+
+    let fileContent = createBitmapBuffer({
+      imageData,
+      width,
+      height,
+      bitsPerPixel,
+      colorTable
+    });
 
     fs.writeFile(filename, fileContent, err => {
       if (err) return reject(err);
