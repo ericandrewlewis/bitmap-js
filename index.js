@@ -1,6 +1,7 @@
 const fs = require("fs");
 
 function padImageData({ unpaddedImageData, width, height }) {
+  height = Math.abs(height);
   const colorValuesPerRow = unpaddedImageData.length / height;
   const padding = 4 - colorValuesPerRow % 4;
   const unpaddedRowLength = colorValuesPerRow;
